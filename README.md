@@ -16,6 +16,7 @@ Týndr-server
 
 ####*Creating* advert instances on the deployment back end
 Create a POST request with the following data:
+
     {
       "name": "Halldór Eldjárn",
       "lost": true,
@@ -25,6 +26,7 @@ Create a POST request with the following data:
       "reward": "Nei",
       "created_at": "2014-10-14T17:40:13.467Z"
     }
+    
 Note that "location" should be on the form "longitude,latitude". Also note, that if you send in an *id* in the POST request, you break the auto incrementation and everything will stop working. "created_at" is a timestamp that should eventually be automatically populated, however for now you will need to send a string with the *same* format as the example above.
 
 Send this POST request to the following URL:
