@@ -28,7 +28,7 @@ Create a POST request with the following data:
 Note that "location" should be on the form "longitude,latitude". Also note, that if you send in an *id* in the POST request, you break the auto incrementation and everything will stop working. "created_at" is a timestamp that should eventually be automatically populated, however for now you will need to send a string with the *same* format as the example above.
 
 Send this POST request to the following URL:
-    http://tyndr.herokuapp.com:80/api/adverts
+    http://tyndr.herokuapp.com/api/adverts
 
 You will receive a status 200 response with the same information you sent, *plus* the unique id that got assigned to it!
 
