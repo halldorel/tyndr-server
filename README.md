@@ -16,7 +16,7 @@ Týndr-server
 
 Communication with the back end
 -------------------------------
-_Note_: You can play around with the GET and POST requests at will on http://tyndr.herokuapp.com/explorer/
+Note: You can play around with the GET and POST requests at will on http://tyndr.herokuapp.com/explorer/
 
 ####*Creating* advert instances on the deployment back end
 
