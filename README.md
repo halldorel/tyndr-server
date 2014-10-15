@@ -14,7 +14,12 @@ Týndr-server
 * Once you have connected to the Heroku server run `> slc loopback:model` and follow the instructions from the wizard.
 
 
+Communication with the back end
+-------------------------------
+_Note_: You can play around with the GET and POST requests at will on http://tyndr.herokuapp.com/explorer/
+
 ####*Creating* advert instances on the deployment back end
+
 Create a POST request with the following data:
 
     {
