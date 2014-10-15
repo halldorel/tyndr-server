@@ -6,7 +6,7 @@ var adverts = [
         name: "Pulsa",
         lost: true,
         resolved: false,
-        location: "64.13548,-21.89541",
+        location: "-21.89541,64.13548",
         description: "Frekar ljótt dýr",
         reward: "500",
         created_at: new Date()
@@ -15,7 +15,7 @@ var adverts = [
         name: "Trefill",
         lost: true,
         resolved: false,
-        location: "64.13548,-21.89541",
+        location: "-21.89541,64.13548",
         description: "Holdsveikt dýr",
         reward: "1500",
         created_at: new Date()
@@ -24,7 +24,7 @@ var adverts = [
         name: "Salmonella",
         lost: true,
         resolved: false,
-        location: "64.13548,-21.89541",
+        location: "-21.89541,64.13548",
         description: "Mjög krúttleg",
         reward: "200",
         created_at: new Date()
