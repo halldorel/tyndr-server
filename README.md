@@ -1,5 +1,6 @@
 Týndr-server
 ============
+The development server is currently running at http://tyndr.herokuapp.com/
 
 ####Running the Týndr server *locally*
 * Install node.js `> brew install node`
