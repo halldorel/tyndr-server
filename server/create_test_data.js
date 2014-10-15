@@ -19,6 +19,15 @@ var adverts = [
         description: "Holdsveikt dýr",
         reward: "1500",
         created_at: new Date()
+    },
+    {
+        name: "Salmonella",
+        lost: true,
+        resolved: false,
+        location: "64.13548,-21.89541",
+        description: "Mjög krúttleg",
+        reward: "200",
+        created_at: new Date()
     }
 ];
 
