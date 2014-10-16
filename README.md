@@ -42,9 +42,11 @@ You will receive a status 200 response with the same information you sent, *plus
 
 ####*Querying* the development back end for adverts
 Querying is easy, you just specify a filter in a GET request and you receive a list of objects that match the query. Note that you may have to url-encode the strings, (e.g. turn spaces into `%20`, brackets from `[` and `]` into `%5B` and `%5D` respectively, etc.) In the following query, the data in the GET request are `{"filter[where][id]" : 3}`
+
     http://tyndr.herokuapp.com/api/adverts?filter[where][id]=3
 
 Another example:
+
     http://tyndr.herokuapp.com/api/adverts?filter[where][name]=Halldór Eldjárn
 
 An empty GET request (with no data) sent to `http://tyndr.herokuapp.com/api/adverts` will return all advert objects in the database
