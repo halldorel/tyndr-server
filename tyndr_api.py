@@ -1,4 +1,8 @@
 """ Back end for Tyndr implemented using Google Cloud Endpoints.
+
+M: models.py
+V: tyndr_api.py
+C: messages.py
 """
 
 import endpoints
@@ -13,6 +17,8 @@ from google.appengine.ext import ndb
 
 # Models
 from models import *
+# Messages
+from messages import *
 
 WEB_CLIENT_ID = ''
 ANDROID_CLIENT_ID = ''
@@ -25,74 +31,6 @@ package = 'tyndr-server'
 FOUND_PETS = 'found_pets'
 LOST_PETS = 'lost_pets'
 
-# Advert collections should be queried on their common ancestor
-def adverts_key(advert_category=FOUND_PETS):
-	""" Constructs a Datastore key for Advert Category entity with
-	category name advert_category.
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is 
-	Params:
-		advert_category: String, key for an AdvertCategory in
-		the Datastore. """
-	return ndb.Key('AdvertCategory', advert_category)
-
-# TODO:
-# Move models into a separate package
-#class Advert(ndb.Model):
-#	""" Models an individual Advert. 
-#	
-#	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-#	# TODO:
-#	#	Associate an Advert object with a User object
-#	#	Create user mgmt system
-#	author = ndb.UserProperty()
-#	#author = ndb.StringProperty()
-#	name = ndb.StringProperty()
-#	description = ndb.StringProperty(indexed = False)
-#	species = ndb.StringProperty()
-#	subspecies = ndb.StringProperty(default=None)
-#	color = ndb.StringProperty()
-#	date_created = ndb.DateTimeProperty(auto_now_add = True)
-
-# TODO:
-# Move messages into a separate package (MVC, y'all)
-class AdvertMessage(messages.Message):
-	""" Contains information about a single advert.
-	Used to pass model representations to a front end.
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	id = messages.IntegerField(1)
-	author = messages.StringField(2)
-	name = messages.StringField(3)
-	description = messages.StringField(4)
-	date_created = message_types.DateTimeField(5)
-
-class AdvertMessageCollection(messages.Message):
-	""" Collection of AdvertMessages. Used to pass multiple adverts
-	to the front end.
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	items = messages.MessageField(AdvertMessage, 1, repeated=True)
-
-class CreateAdvertMessage(messages.Message):
-	""" Passes information about a new ad from the endpoint
-	to the backend.
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	name = messages.StringField(1)
-	description = messages.StringField(2)
-	species = messages.StringField(3)
-	subspecies = messages.StringField(4)
-	age = messages.IntegerField(5)
-
-class StatusMessage(messages.Message):
-	""" Passes status to front end when operation should not return
-	another value.
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	message = messages.StringField(1)
-
-
 
 @endpoints.api(name='tyndr', version='v1',
 	       allowed_client_ids=[WEB_CLIENT_ID, ANDROID_CLIENT_ID,
@@ -102,8 +40,6 @@ class StatusMessage(messages.Message):
 class Tyndr_API(remote.Service):
 	""" Tyndr API v1. """
 	
-	# EXPERIMENTALE LOCO
-	# ==================
 	CREATE = endpoints.ResourceContainer(CreateAdvertMessage)
 	@endpoints.method(CREATE,
 			  StatusMessage,
@@ -171,11 +107,11 @@ class Tyndr_API(remote.Service):
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		print("Requested ad: " + str(request.id))
 		try:
+			# Query on ancestor
 			ad = ndb.Key('AdvertCategory',
 				     LOST_PETS,
 				     'Advert',
 				     request.id).get()
-			print(">>>>>>>> " + str(ad))
 			return AdvertMessage(id = ad.key.id(),
 					     author = str(ad.author),
 					     name = ad.name,
@@ -183,11 +119,7 @@ class Tyndr_API(remote.Service):
 					     date_created = ad.date_created)
 		except Exception as e:
 			print(e)
-			raise endpoints.NotFoundException('Advert %s not found.' % (request.id,))
-
-
-	# EXPERIMENTO LOCO EST FINITO
-	# ===========================
-
+			raise endpoints.NotFoundException(
+					'Advert %s not found.' % (request.id,))
 
 APPLICATION = endpoints.api_server([Tyndr_API])
