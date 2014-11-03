@@ -1,3 +1,6 @@
+# Python
+*.py[cod]
+
 # Logs
 logs
 *.log

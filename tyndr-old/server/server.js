@@ -10,6 +10,8 @@ app.use(loopback.favicon());
 app.use(loopback.compress());
 
 // -- Add your pre-processing middleware here --
+var bodyparser = require('body-parser');
+app.use(bodyparser.urlencoded({ extended: true }));
 
 // boot scripts mount components like REST API
 boot(app, __dirname);
@@ -20,6 +22,11 @@ boot(app, __dirname);
 // Example:
 //   var path = require('path');
 //   app.use(loopback.static(path.resolve(__dirname, '../client')));
+var path = require('path');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'html');
+app.engine('html', require('ejs').renderFile);
+app.set('json spaces', 2); //pretty print json responses
 
 // Requests that get this far won't be handled
 // by any middleware. Convert them into a 404 error

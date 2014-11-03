@@ -4,12 +4,12 @@
     "connector": "memory"
   },
   "tyndr": {
-    "name": "tyndr",
-    "connector": "postgresql",
     "host": "ec2-54-217-231-118.eu-west-1.compute.amazonaws.com",
     "port": 5432,
     "database": "d6m3ufl6ue2r70",
     "username": "fwmwwagdbuwucw",
-    "password": "SA4U3_aV7z-IR00zr88_LdNU13"
+    "password": "SA4U3_aV7z-IR00zr88_LdNU13",
+    "name": "tyndr",
+    "connector": "postgresql"
   }
 }
