@@ -11,6 +11,9 @@ from protorpc import remote
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
+# Models
+from models import *
+
 WEB_CLIENT_ID = ''
 ANDROID_CLIENT_ID = ''
 IOS_CLIENT_ID = ''
@@ -35,22 +38,24 @@ def adverts_key(advert_category=FOUND_PETS):
 
 # TODO:
 # Move models into a separate package
-class Advert(ndb.Model):
-	""" Models an individual Advert. 
-	
-	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	# TODO:
-	#	Associate an Advert object with a User object
-	#	Create user mgmt system
-	author = ndb.UserProperty()
-	#author = ndb.StringProperty()
-	name = ndb.StringProperty()
-	description = ndb.StringProperty(indexed = False)
-	species = ndb.StringProperty()
-	subspecies = ndb.StringProperty(default=None)
-	color = ndb.StringProperty()
-	date_created = ndb.DateTimeProperty(auto_now_add = True)
+#class Advert(ndb.Model):
+#	""" Models an individual Advert. 
+#	
+#	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+#	# TODO:
+#	#	Associate an Advert object with a User object
+#	#	Create user mgmt system
+#	author = ndb.UserProperty()
+#	#author = ndb.StringProperty()
+#	name = ndb.StringProperty()
+#	description = ndb.StringProperty(indexed = False)
+#	species = ndb.StringProperty()
+#	subspecies = ndb.StringProperty(default=None)
+#	color = ndb.StringProperty()
+#	date_created = ndb.DateTimeProperty(auto_now_add = True)
 
+# TODO:
+# Move messages into a separate package (MVC, y'all)
 class AdvertMessage(messages.Message):
 	""" Contains information about a single advert.
 	Used to pass model representations to a front end.
@@ -164,11 +169,13 @@ class Tyndr_API(remote.Service):
 		""" Returns the Advert with id.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-		print(request.id)
-		r = ndb.Key('Advert', 1).get()
-		print(r)
+		print("Requested ad: " + str(request.id))
 		try:
-			ad = Advert.get_by_id(int(request.id))
+			ad = ndb.Key('AdvertCategory',
+				     LOST_PETS,
+				     'Advert',
+				     request.id).get()
+			print(">>>>>>>> " + str(ad))
 			return AdvertMessage(id = ad.key.id(),
 					     author = str(ad.author),
 					     name = ad.name,
