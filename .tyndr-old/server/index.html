@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>LoopBack example access control</title>
+  </head>
+  <body>
+    <form action="/projects" method="post">
+      <input type="text" name="email" value="tommi@tommi.is" placeholder="Email"><br>
+      <input type="password" name="password" value="tommi" placeholder="Password"><br>
+      <input type="submit" value="Login">
+    </form>
+
+      <% if (loginFailed) { %>
+        <p style="color:red">Login failed, please try again</p>
+      <% } %>
+  </body>
+</html>

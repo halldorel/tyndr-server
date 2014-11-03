@@ -1,0 +1,15 @@
+{
+  "name": "user",
+  "base": "PersistedModel",
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "adverts": {
+      "type": "hasMany",
+      "model": "advert",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": []
+}
