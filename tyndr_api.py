@@ -53,10 +53,11 @@ class AdvertMessage(messages.Message):
 	Used to pass model representations to a front end.
 	
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	author = messages.StringField(1)
-	name = messages.StringField(2)
-	description = messages.StringField(3)
-	date_created = message_types.DateTimeField(4)
+	id = messages.IntegerField(1)
+	author = messages.StringField(2)
+	name = messages.StringField(3)
+	description = messages.StringField(4)
+	date_created = message_types.DateTimeField(5)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts
@@ -102,7 +103,6 @@ class Tyndr_API(remote.Service):
 				name = request.name,
 				description = request.description)
 		advert.put()
-		#print(advert.id)
 		return StatusMessage(message='success')
 
 	NO_RESOURCE = endpoints.ResourceContainer(
@@ -110,71 +110,45 @@ class Tyndr_API(remote.Service):
 			no = messages.IntegerField(1, variant=messages.Variant.INT32))
 	@endpoints.method(NO_RESOURCE,
 			  AdvertMessageCollection,
-			  path='advert/all/{no}',
+			  path='all/{no}',
 			  http_method='GET',
 			  name='advert.all')
 	def get_all_adverts(self, request):
-		print("here")
 		""" Currently returns the no newest adverts in Datastore.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		# TODO:
 		#category = request.get('advert_category', LOST_PETS)
 		category = LOST_PETS
-		print(request.no)
 		adverts = Advert.query(ancestor=adverts_key(category))\
 				.order(-Advert.date_created)
 		adverts = adverts.fetch(request.no)
-		print(adverts)
 		# Package adverts in messages
-		result = [AdvertMessage(author = ad.author,
+		result = [AdvertMessage(id = ad.id,
+					author = ad.author,
 					name = ad.name,
 					description = ad.description,
 					date_created = ad.date_created)
 			  for ad in adverts]
 		return AdvertMessageCollection(items=result)
-	"""	
-	@endpoints.method(message_types.VoidMessage,
-			  StatusMessage,
-			  path='advert/{number}',
-			  http_method='GET',
-			  name='advert.test')
-	def test_ads(self, request):
-		return StatusMessage(message = 'test')
-		category = LOST_PETS
-		adverts = Advert.query(ancestor=adverts_key(category))\
-				.order(-Advert.date_created)
-		adverts = adverts.fetch(request.number)
-		# Package adverts in messages
-		result = [AdvertMessage(author = ad.author,
-					name = ad.name,
-					description = ad.description,
-					date_created = ad.date_created)
-			  for ad in adverts]
-		return AdvertMessageCollection(items=result)
-	"""
-	"""
-	@endpoints.method(message_types.VoidMessage, StatusMessage,
-			path='advert/weird', http_method='GET',
-			name='advert.test')
-	def greetings_list(self, unused_request):
-		return StatusMessage(message = 'test')
-	"""
+	
 	ID_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
 			id = messages.IntegerField(1, variant=messages.Variant.INT32))
 	@endpoints.method(ID_RESOURCE,
 			  AdvertMessage,
-			  path='advert/{id}',
+			  path='single/{id}',
 			  http_method='GET',
 			  name='advert.query')
 	def query_adverts(self, request):
+		return AdvertMessage(author='place', name='holder', description='junk')
 		""" Returns the Advert with id.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		try:
 			ad = Advert.get_by_id(request.id)
-			return AdvertMessage(author = ad.author,
+			return AdvertMessage(id = ad.id,
+					     author = ad.author,
 					     name = ad.name,
 					     description = ad.description,
 					     date_created = ad.date_created)
