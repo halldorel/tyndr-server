@@ -42,10 +42,13 @@ class Advert(ndb.Model):
 	# TODO:
 	#	Associate an Advert object with a User object
 	#	Create user mgmt system
-	#author = ndb.UserProperty()
-	author = ndb.StringProperty()
+	author = ndb.UserProperty()
+	#author = ndb.StringProperty()
 	name = ndb.StringProperty()
 	description = ndb.StringProperty(indexed = False)
+	species = ndb.StringProperty()
+	subspecies = ndb.StringProperty(default=None)
+	color = ndb.StringProperty()
 	date_created = ndb.DateTimeProperty(auto_now_add = True)
 
 class AdvertMessage(messages.Message):
@@ -66,6 +69,17 @@ class AdvertMessageCollection(messages.Message):
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	items = messages.MessageField(AdvertMessage, 1, repeated=True)
 
+class CreateAdvertMessage(messages.Message):
+	""" Passes information about a new ad from the endpoint
+	to the backend.
+	
+	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+	name = messages.StringField(1)
+	description = messages.StringField(2)
+	species = messages.StringField(3)
+	subspecies = messages.StringField(4)
+	age = messages.IntegerField(5)
+
 class StatusMessage(messages.Message):
 	""" Passes status to front end when operation should not return
 	another value.
@@ -75,18 +89,20 @@ class StatusMessage(messages.Message):
 
 
 
-@endpoints.api(name='tyndr', version='v1')
+@endpoints.api(name='tyndr', version='v1',
+	       allowed_client_ids=[WEB_CLIENT_ID, ANDROID_CLIENT_ID,
+		       		   IOS_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID],
+	       audiences=[ANDROID_AUDIENCE],
+	       scopes=[endpoints.EMAIL_SCOPE])
 class Tyndr_API(remote.Service):
 	""" Tyndr API v1. """
 	
 	# EXPERIMENTALE LOCO
 	# ==================
-	CREATE = endpoints.ResourceContainer(
-		 AdvertMessage)
-		 
+	CREATE = endpoints.ResourceContainer(CreateAdvertMessage)
 	@endpoints.method(CREATE,
 			  StatusMessage,
-			  path='advert',
+			  path='create',
 			  http_method='POST',
 			  name='advert.create')
 	def create_advert(self, request):
@@ -97,13 +113,17 @@ class Tyndr_API(remote.Service):
 		# TODO:
 		#category = request.get('advert_category', LOST_PETS)
 		category = LOST_PETS
+		user = endpoints.get_current_user()
+		#if not user:
+		#	return StatusMessage(message='unidentified user: %s' % (user,))
 		# Create a new advert
 		advert = Advert(parent = adverts_key(category),
-				author = request.author,
+				author = user,
 				name = request.name,
 				description = request.description)
 		advert.put()
 		return StatusMessage(message='success')
+
 
 	NO_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
@@ -124,8 +144,8 @@ class Tyndr_API(remote.Service):
 				.order(-Advert.date_created)
 		adverts = adverts.fetch(request.no)
 		# Package adverts in messages
-		result = [AdvertMessage(id = ad.id,
-					author = ad.author,
+		result = [AdvertMessage(id = ad.key.id(),
+					author = str(ad.author),
 					name = ad.name,
 					description = ad.description,
 					date_created = ad.date_created)
@@ -141,14 +161,16 @@ class Tyndr_API(remote.Service):
 			  http_method='GET',
 			  name='advert.query')
 	def query_adverts(self, request):
-		return AdvertMessage(author='place', name='holder', description='junk')
 		""" Returns the Advert with id.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		print(request.id)
+		r = ndb.Key('Advert', 1).get()
+		print(r)
 		try:
-			ad = Advert.get_by_id(request.id)
-			return AdvertMessage(id = ad.id,
-					     author = ad.author,
+			ad = Advert.get_by_id(int(request.id))
+			return AdvertMessage(id = ad.key.id(),
+					     author = str(ad.author),
 					     name = ad.name,
 					     description = ad.description,
 					     date_created = ad.date_created)
