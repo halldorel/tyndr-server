@@ -31,7 +31,9 @@ class CreateAdvertMessage(messages.Message):
 	description = messages.StringField(2)
 	species = messages.StringField(3)
 	subspecies = messages.StringField(4)
-	age = messages.IntegerField(5)
+	color = messages.StringField(5)
+	age = messages.IntegerField(6)
+	label = messages.StringField(7, required=True)
 
 class StatusMessage(messages.Message):
 	""" Passes status to front end when operation should not return
@@ -39,3 +41,4 @@ class StatusMessage(messages.Message):
 	
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	message = messages.StringField(1)
+

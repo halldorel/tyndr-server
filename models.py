@@ -4,9 +4,6 @@ class Advert(ndb.Model):
 	""" Models an individual Advert. 
 
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-	# TODO:
-	#	Associate an Advert object with a User object
-	#	Create user mgmt system
 	author = ndb.UserProperty()
 	description = ndb.StringProperty()
 	name = ndb.StringProperty()
@@ -14,7 +11,9 @@ class Advert(ndb.Model):
 	species = ndb.StringProperty()
 	subspecies = ndb.StringProperty(default=None)
 	color = ndb.StringProperty()
+	age = ndb.IntegerProperty()
 	date_created = ndb.DateTimeProperty(auto_now_add = True)
+	resolved = ndb.BooleanProperty(default = False)
 
 
 # Advert collections should be queried on their common ancestor

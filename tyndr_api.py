@@ -51,37 +51,39 @@ class Tyndr_API(remote.Service):
 		an Advert instance with it.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-		# TODO:
-		#category = request.get('advert_category', LOST_PETS)
-		category = LOST_PETS
+		label = request.label if request.label else LOST_PETS
 		user = endpoints.get_current_user()
 		#if not user:
 		#	return StatusMessage(message='unidentified user: %s' % (user,))
 		# Create a new advert
-		advert = Advert(parent = adverts_key(category),
+		advert = Advert(parent = adverts_key(label),
 				author = user,
 				name = request.name,
-				description = request.description)
+				description = request.description,
+				species = request.species,
+				subspecies = request.subspecies,
+				age = request.age)
 		advert.put()
 		return StatusMessage(message='success')
 
 
 	NO_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
-			no = messages.IntegerField(1, variant=messages.Variant.INT32))
+			no = messages.IntegerField(1, variant=messages.Variant.INT32),
+			label = messages.StringField(2, variant=messages.Variant.STRING))
 	@endpoints.method(NO_RESOURCE,
 			  AdvertMessageCollection,
 			  path='all/{no}',
 			  http_method='GET',
 			  name='advert.all')
 	def get_all_adverts(self, request):
-		""" Currently returns the no newest adverts in Datastore.
+		""" Currently returns the request.no newest adverts in Datastore.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		# TODO:
 		#category = request.get('advert_category', LOST_PETS)
-		category = LOST_PETS
-		adverts = Advert.query(ancestor=adverts_key(category))\
+		label = request.label if request.label else LOST_PETS
+		adverts = Advert.query(ancestor=adverts_key(label))\
 				.order(-Advert.date_created)
 		adverts = adverts.fetch(request.no)
 		# Package adverts in messages
@@ -95,21 +97,23 @@ class Tyndr_API(remote.Service):
 	
 	ID_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
-			id = messages.IntegerField(1, variant=messages.Variant.INT32))
+			id = messages.IntegerField(1, variant=messages.Variant.INT32),
+			label = messages.StringField(2, variant=messages.Variant.STRING))
 	@endpoints.method(ID_RESOURCE,
 			  AdvertMessage,
 			  path='single/{id}',
 			  http_method='GET',
 			  name='advert.query')
 	def query_adverts(self, request):
-		""" Returns the Advert with id.
+		""" Returns the Advert with request.id.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		print("Requested ad: " + str(request.id))
+		label = request.label if request.label else LOST_PETS
 		try:
 			# Query on ancestor
 			ad = ndb.Key('AdvertCategory',
-				     LOST_PETS,
+				     label,
 				     'Advert',
 				     request.id).get()
 			return AdvertMessage(id = ad.key.id(),
@@ -121,5 +125,15 @@ class Tyndr_API(remote.Service):
 			print(e)
 			raise endpoints.NotFoundException(
 					'Advert %s not found.' % (request.id,))
+	"""
+	@endpoints.method(message_types.VoidMessage,
+			  AdvertMessageCollection,
+			  path='my-ads',
+			  http_method='GET',
+			  name='advert.mine')
+	def get_my_adverts(self, request):
+		"""# Returns all Adverts associated with an authorised user.
+		
+	#	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 
 APPLICATION = endpoints.api_server([Tyndr_API])
