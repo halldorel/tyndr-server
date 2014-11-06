@@ -13,7 +13,11 @@ class AdvertMessage(messages.Message):
 	author = messages.StringField(2)
 	name = messages.StringField(3)
 	description = messages.StringField(4)
-	date_created = message_types.DateTimeField(5)
+	species = messages.StringField(5)
+	subspecies = messages.StringField(6)
+	color = messages.StringField(7)
+	age = messages.IntegerField(8)
+	date_created = message_types.DateTimeField(9)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts

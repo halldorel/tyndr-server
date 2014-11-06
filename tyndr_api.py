@@ -31,6 +31,18 @@ package = 'tyndr-server'
 FOUND_PETS = 'found_pets'
 LOST_PETS = 'lost_pets'
 
+def pack_adverts(adverts):
+	result = [AdvertMessage(id = ad.key.id(),
+				author = str(ad.author),
+				name = ad.name,
+				description = ad.description,
+				species = ad.species,
+				subspecies = ad.subspecies,
+				color = ad.color,
+				age = ad.age,
+				date_created = ad.date_created)
+		  for ad in adverts]
+	return AdvertMessageCollection(items=result)
 
 @endpoints.api(name='tyndr', version='v1',
 	       allowed_client_ids=[WEB_CLIENT_ID, ANDROID_CLIENT_ID,
@@ -77,24 +89,16 @@ class Tyndr_API(remote.Service):
 			  http_method='GET',
 			  name='advert.all')
 	def get_all_adverts(self, request):
-		""" Currently returns the request.no newest adverts in Datastore.
+		""" Currently returns the no newest adverts in Datastore.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-		# TODO:
-		#category = request.get('advert_category', LOST_PETS)
 		label = request.label if request.label else LOST_PETS
 		adverts = Advert.query(ancestor=adverts_key(label))\
 				.order(-Advert.date_created)
 		adverts = adverts.fetch(request.no)
 		# Package adverts in messages
-		result = [AdvertMessage(id = ad.key.id(),
-					author = str(ad.author),
-					name = ad.name,
-					description = ad.description,
-					date_created = ad.date_created)
-			  for ad in adverts]
-		return AdvertMessageCollection(items=result)
-	
+		return pack_adverts(adverts)
+
 	ID_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
 			id = messages.IntegerField(1, variant=messages.Variant.INT32),
@@ -105,7 +109,7 @@ class Tyndr_API(remote.Service):
 			  http_method='GET',
 			  name='advert.query')
 	def query_adverts(self, request):
-		""" Returns the Advert with request.id.
+		""" Returns the Advert with id.
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		print("Requested ad: " + str(request.id))
@@ -120,20 +124,29 @@ class Tyndr_API(remote.Service):
 					     author = str(ad.author),
 					     name = ad.name,
 					     description = ad.description,
+					     species = ad.species,
+					     subspecies = ad.subspecies,
+					     color = ad.color,
+					     age = ad.age,
 					     date_created = ad.date_created)
 		except Exception as e:
 			print(e)
 			raise endpoints.NotFoundException(
 					'Advert %s not found.' % (request.id,))
-	"""
+	
 	@endpoints.method(message_types.VoidMessage,
 			  AdvertMessageCollection,
 			  path='my-ads',
 			  http_method='GET',
 			  name='advert.mine')
 	def get_my_adverts(self, request):
-		"""# Returns all Adverts associated with an authorised user.
-		
-	#	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		""" Returns an AdvertMessageCollection of all of an
+		authorised user's Adverts.
+
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		user = endpoints.get_current_user()
+		adverts = Advert.query(Advert.user = user)
+		return pack_adverts(adverts)
+
 
 APPLICATION = endpoints.api_server([Tyndr_API])
