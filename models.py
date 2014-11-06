@@ -15,6 +15,15 @@ class Advert(ndb.Model):
 	date_created = ndb.DateTimeProperty(auto_now_add = True)
 	resolved = ndb.BooleanProperty(default = False)
 
+class Picture(ndb.Model):
+	""" An uploaded picture.
+
+	Author: Halldor Eldjarn, hae28@hi.is """
+	author = ndb.UserProperty()
+	location = ndb.GeoPtProperty()
+	date_uploaded = ndb.DateTimeProperty(auto_now_add = True)
+	picture_data = ndb.BlobProperty()
+	advert_id = ndb.IntegerProperty()
 
 # Advert collections should be queried on their common ancestor
 def adverts_key(advert_category):
