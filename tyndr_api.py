@@ -32,6 +32,11 @@ FOUND_PETS = 'found_pets'
 LOST_PETS = 'lost_pets'
 
 def pack_adverts(adverts):
+	""" Packs adverts in an AdvertMessageCollection
+
+	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
+	Params:
+		adverts: A list of Advert model instances. """
 	result = [AdvertMessage(id = ad.key.id(),
 				author = str(ad.author),
 				name = ad.name,
@@ -92,7 +97,8 @@ class Tyndr_API(remote.Service):
 	def get_all_adverts(self, request):
 		""" Currently returns the no newest adverts in Datastore.
 		
-		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
+		Author: Halldor Eldjarn, hae28@hi.is """
 		label = request.label if request.label else LOST_PETS
 		adverts = Advert.query(ancestor=adverts_key(label))\
 				.order(-Advert.date_created)
