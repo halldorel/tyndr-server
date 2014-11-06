@@ -15,6 +15,9 @@ from protorpc import remote
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
+# Image handling
+from google.appengine.api import images
+
 # Models
 from models import *
 # Messages
@@ -84,6 +87,28 @@ class Tyndr_API(remote.Service):
 		advert.put()
 		return StatusMessage(message='success')
 
+	UPLOAD_PICTURE = endpoints.ResourceContainer(UploadImageMessage)
+	@endpoints.method(UPLOAD_PICTURE,
+		UploadPictureMessage,
+		path='upload',
+		http_method='POST',
+		name='picture.create')
+	def upload_picture(self, request):
+		""" Uploads the image from the request to the S3 bucket. 
+
+		Author: Halldor Eldjarn, hae28@hi.is
+		"""
+		# TODO:  Should upload image data to S3 instead of storing in db
+
+		picture_data = request.get('picture')
+
+		user = endpoints.get_current_user()
+		location = GeoPt(request.lat, request.lon)
+		picture = Picture(author = user,
+			location = location,
+			picture_data = db.Blob(picture_data))
+		picture.put()
+		return StatusMessage(message='success')
 
 	NO_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,

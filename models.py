@@ -22,7 +22,8 @@ class Picture(ndb.Model):
 	author = ndb.UserProperty()
 	location = ndb.GeoPtProperty()
 	date_uploaded = ndb.DateTimeProperty(auto_now_add = True)
-	picture_data = ndb.BlobProperty() 
+	picture_data = ndb.BlobProperty()
+	advert_id = ndb.IntegerProperty()
 
 # Advert collections should be queried on their common ancestor
 def adverts_key(advert_category):

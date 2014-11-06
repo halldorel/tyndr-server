@@ -46,3 +46,9 @@ class StatusMessage(messages.Message):
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	message = messages.StringField(1)
 
+class UploadPictureMessage(messages.Message):
+	""" Passes info with uploaded Picture.
+
+	Author: Halldor Eldjarn, hae28@hi.is """
+	lat = messages.FloatField(1)
+	lon = messages.FloatField(2)
