@@ -62,7 +62,8 @@ class Tyndr_API(remote.Service):
 		""" Grabs information from the request.POST and populates
 		an Advert instance with it.
 		
-		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
+		Author: Halldor Eldjarn, hae28@hi.is """
 		label = request.label if request.label else LOST_PETS
 		user = endpoints.get_current_user()
 		#if not user:
@@ -111,7 +112,8 @@ class Tyndr_API(remote.Service):
 	def query_adverts(self, request):
 		""" Returns the Advert with id.
 		
-		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
+		Author: Halldor Eldjarn, hae28@hi.is """
 		print("Requested ad: " + str(request.id))
 		label = request.label if request.label else LOST_PETS
 		try:
