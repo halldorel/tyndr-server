@@ -18,6 +18,9 @@ class AdvertMessage(messages.Message):
 	color = messages.StringField(7)
 	age = messages.IntegerField(8)
 	date_created = message_types.DateTimeField(9)
+	# Geotag
+	lat = messages.StringField(10)
+	lon = messages.StringField(11)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts
@@ -37,7 +40,9 @@ class CreateAdvertMessage(messages.Message):
 	subspecies = messages.StringField(4)
 	color = messages.StringField(5)
 	age = messages.IntegerField(6)
-	label = messages.StringField(7, required=True)
+	lat = messages.StringField(7)
+	lon = messages.StringField(8)
+	label = messages.StringField(9, required=True)
 
 class StatusMessage(messages.Message):
 	""" Passes status to front end when operation should not return
@@ -45,6 +50,12 @@ class StatusMessage(messages.Message):
 	
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	message = messages.StringField(1)
+
+class AdvertReferenceMessage(messages.Message):
+	""" Passes an advert's reference number to the endpoint
+	
+	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+	reference = messages.StringField(1)
 
 class UploadPictureMessage(messages.Message):
 	""" Passes info with uploaded Picture.

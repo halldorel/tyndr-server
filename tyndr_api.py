@@ -62,7 +62,7 @@ class Tyndr_API(remote.Service):
 	
 	CREATE = endpoints.ResourceContainer(CreateAdvertMessage)
 	@endpoints.method(CREATE,
-			  StatusMessage,
+			  AdvertReferenceMessage,
 			  path='create',
 			  http_method='POST',
 			  name='advert.create')
@@ -74,8 +74,8 @@ class Tyndr_API(remote.Service):
 		Author: Halldor Eldjarn, hae28@hi.is """
 		label = request.label if request.label else LOST_PETS
 		user = endpoints.get_current_user()
-		#if not user:
-		#	return StatusMessage(message='unidentified user: %s' % (user,))
+		#if user is None:
+		#	raise endpoints.UnauthorizedException('Invalid token')
 		# Create a new advert
 		advert = Advert(parent = adverts_key(label),
 				author = user,
@@ -83,32 +83,36 @@ class Tyndr_API(remote.Service):
 				description = request.description,
 				species = request.species,
 				subspecies = request.subspecies,
-				age = request.age)
-		advert.put()
-		return StatusMessage(message='success')
+				color = request.color,
+				age = request.age,
+				lat = request.lat,
+				lon = request.lon)
+		reference = str(advert.put().id())
+		
+		return AdvertReferenceMessage(reference = reference)
 
-	UPLOAD_PICTURE = endpoints.ResourceContainer(UploadImageMessage)
-	@endpoints.method(UPLOAD_PICTURE,
-		UploadPictureMessage,
-		path='upload',
-		http_method='POST',
-		name='picture.create')
-	def upload_picture(self, request):
-		""" Uploads the image from the request to the S3 bucket. 
-
-		Author: Halldor Eldjarn, hae28@hi.is
-		"""
-		# TODO:  Should upload image data to S3 instead of storing in db
-
-		picture_data = request.get('picture')
-
-		user = endpoints.get_current_user()
-		location = GeoPt(request.lat, request.lon)
-		picture = Picture(author = user,
-			location = location,
-			picture_data = db.Blob(picture_data))
-		picture.put()
-		return StatusMessage(message='success')
+	#UPLOAD_PICTURE = endpoints.ResourceContainer(UploadImageMessage)
+	#@endpoints.method(UPLOAD_PICTURE,
+	#	UploadPictureMessage,
+	#	path='upload',
+	#	http_method='POST',
+	#	name='picture.create')
+	#def upload_picture(self, request):
+	#	""" Uploads the image from the request to the S3 bucket. 
+	#
+	#	Author: Halldor Eldjarn, hae28@hi.is
+	#	"""
+	#	# TODO:  Should upload image data to S3 instead of storing in db
+	#
+	#	picture_data = request.get('picture')
+	#
+	#	user = endpoints.get_current_user()
+	#	location = GeoPt(request.lat, request.lon)
+	#	picture = Picture(author = user,
+	#		location = location,
+	#		picture_data = db.Blob(picture_data))
+	#	picture.put()
+	#	return StatusMessage(message='success')
 
 	NO_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
@@ -175,11 +179,26 @@ class Tyndr_API(remote.Service):
 	def get_my_adverts(self, request):
 		""" Returns an AdvertMessageCollection of all of an
 		authorised user's Adverts.
-
+	
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		user = endpoints.get_current_user()
-		adverts = Advert.query(Advert.user = user)
+		if raise_unauthorized and current_user is None:
+			raise endpoints.UnauthorizedException('Invalid token')
+		adverts = Advert.query(user = user)
 		return pack_adverts(adverts)
 
+	@endpoints.method(message_types.VoidMessage,
+			  StatusMessage,
+			  path='user-debug',
+			  http_method='GET',
+			  name='user.debug')
+	def user_auth_debug(self, request):
+		""" Returns the email address of authorised user 
+		
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		user = endpoints.get_current_user()
+		if raise_unauthorized and current_user is None:
+			raise endpoints.UnauthorizedException('Invalid token')
+		return StatusMessage(message = user.email())
 
 APPLICATION = endpoints.api_server([Tyndr_API])
