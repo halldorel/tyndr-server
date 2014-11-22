@@ -48,6 +48,8 @@ def pack_adverts(adverts):
 				subspecies = ad.subspecies,
 				color = ad.color,
 				age = ad.age,
+				lat = ad.lat,
+				lon = ad.lon,
 				date_created = ad.date_created)
 		  for ad in adverts]
 	return AdvertMessageCollection(items=result)
@@ -165,6 +167,8 @@ class Tyndr_API(remote.Service):
 					     subspecies = ad.subspecies,
 					     color = ad.color,
 					     age = ad.age,
+					     lat = ad.lat,
+					     lon = ad.lon,
 					     date_created = ad.date_created)
 		except Exception as e:
 			print(e)
