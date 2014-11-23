@@ -9,13 +9,13 @@ package = 'tyndr-server'
 
 import endpoints
 # Message passing
-from protorpc import messages
-from protorpc import message_types
+#from protorpc import messages
+#from protorpc import message_types
 from protorpc import remote
 
 # Database access
 from google.appengine.api import users
-from google.appengine.ext import ndb
+#from google.appengine.ext import ndb
 
 # Image handling
 from google.appengine.api import images
@@ -30,8 +30,6 @@ ANDROID_CLIENT_ID = '259192441078-65b660d346mf6sirs2mpcbg03sdk8ftj.apps.googleus
 IOS_CLIENT_ID = ''
 ANDROID_AUDIENCE = WEB_CLIENT_ID
 
-LAT_R = 0.2
-LON_R = 0.2
 
 # Default advert categories
 FOUND_PETS = 'found_pets'
@@ -90,19 +88,21 @@ class Tyndr_API(remote.Service):
         Author: Halldor Eldjarn, hae28@hi.is """
         label = request.label if request.label else LOST_PETS
         user = endpoints.get_current_user()
-        # if user is None:
-        #	raise endpoints.UnauthorizedException('Invalid token')
+        if user is None:
+            raise endpoints.UnauthorizedException('Invalid token')
         # Create a new advert
-        advert = Advert(parent=adverts_key(label),
-                        author=user,
-                        name=request.name,
-                        description=request.description,
-                        species=request.species,
-                        subspecies=request.subspecies,
-                        color=request.color,
-                        age=request.age,
-                        lat=request.lat,
-                        lon=request.lon)
+        advert = Advert(
+            parent=adverts_key(label),
+            author=user,
+            name=request.name,
+            description=request.description,
+            species=request.species,
+            subspecies=request.subspecies,
+            color=request.color,
+            age=request.age,
+            lat=request.lat,
+            lon=request.lon
+        )
         reference = str(advert.put().id())
 
         return AdvertReferenceMessage(reference=reference)
@@ -261,9 +261,9 @@ class Tyndr_API(remote.Service):
 
     LOC_RESOURCE = endpoints.ResourceContainer(
         message_types.VoidMessage,
-        lat = messages.FloatField(1, variant = messages.Variant.FLOAT),
-        lon = messages.FloatField(2, variant = messages.Variant.FLOAT),
-        rng = messages.FloatField(3, variant = messages.Variant.FLOAT),
+        lat = messages.FloatField(1, variant = messages.Variant.DOUBLE),
+        lon = messages.FloatField(2, variant = messages.Variant.DOUBLE),
+        rng = messages.FloatField(3, variant = messages.Variant.DOUBLE),
         label = messages.StringField(4, variant = messages.Variant.STRING)
     )
 
@@ -296,16 +296,28 @@ class Tyndr_API(remote.Service):
     #################
 
 
-#    MSG_CREATE_RESOURCE = endpoints.ResourceContainer(
-#        message_types.VoidMessage,
-#        msg = messages.StringField(1, variant = messages.Variant.STRING),
-#        receiver = messages.StringField(2, variant = messages.Variant.STRING)
-#    )
-#
-#    @endponints.method(MSG_CREATE_RESOURCE,
-#                       StatusMessage,
-#                       path='create-msg',
-#                       http_method='POST',
-#                       name='msg.create')
+    MSG_CREATE_RESOURCE = endpoints.ResourceContainer(
+        message_types.VoidMessage,
+        msg = messages.StringField(1, variant = messages.Variant.STRING),
+        receiver = messages.StringField(2, variant = messages.Variant.STRING)
+    )
+
+    @endpoints.method(MSG_CREATE_RESOURCE,
+                       StatusMessage,
+                       path='create-msg',
+                       http_method='POST',
+                       name='msg.create')
+    def create_message(self, request):
+        sender = endpoints.get_current_user()
+        #if sender is None:
+        #    raise endpoints.UnauthorizedException('Invalid token')
+        receiver = users.query(id = request.receiver)
+        print(receiver)
+        #message = Message(
+        #    text = request.msg,
+        #
+        #)
+        return StatusMessage(message = 'drasl')
+
 
 APPLICATION = endpoints.api_server([Tyndr_API])
