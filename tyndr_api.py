@@ -148,7 +148,7 @@ class Tyndr_API(remote.Service):
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		label = request.label if request.label else LOST_PETS
 		user = endpoints.get_current_user()
-		if raise_unauthorized and current_user is None:
+		if user is None:
 			raise endpoints.UnauthorizedException('Invalid token')
 		try:
 			ad = ndb.Key('AdvertCategory',
@@ -223,7 +223,7 @@ class Tyndr_API(remote.Service):
 	
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		user = endpoints.get_current_user()
-		if raise_unauthorized and current_user is None:
+		if user is None:
 			raise endpoints.UnauthorizedException('Invalid token')
 		adverts = Advert.query(user == user)
 		return pack_adverts(adverts)
@@ -238,7 +238,7 @@ class Tyndr_API(remote.Service):
 		
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		user = endpoints.get_current_user()
-		if raise_unauthorized and current_user is None:
+		if user is None:
 			raise endpoints.UnauthorizedException('Invalid token')
 		return StatusMessage(message = user.email())
 
@@ -262,11 +262,11 @@ class Tyndr_API(remote.Service):
 
 		label = request.label if request.label else LOST_PETS
 		adverts = Advert.query(ancestor = adverts_key(label),
-				       resolved == False,
-				       lat > lat - LAT_R,
-				       lat < lat + LAT_R,
-				       lon > lon - LON_R,
-				       lon < lon + LON_R)
+					resolved = False,
+					lat > lat - LAT_R,
+					lat < lat + LAT_R,
+					lon > lon - LON_R,
+					lon < lon + LON_R)
 		return pack_adverts(adverts)
 
 APPLICATION = endpoints.api_server([Tyndr_API])
