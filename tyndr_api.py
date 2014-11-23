@@ -5,6 +5,8 @@ V: tyndr_api.py
 C: messages.py
 """
 
+package = 'tyndr-server'
+
 import endpoints
 # Message passing
 from protorpc import messages
@@ -28,7 +30,8 @@ ANDROID_CLIENT_ID = ''
 IOS_CLIENT_ID = ''
 ANDROID_AUDIENCE = WEB_CLIENT_ID
 
-package = 'tyndr-server'
+LAT_R = 0.2
+LON_R = 0.2
 
 # Default advert categories
 FOUND_PETS = 'found_pets'
@@ -93,6 +96,78 @@ class Tyndr_API(remote.Service):
 		
 		return AdvertReferenceMessage(reference = reference)
 
+	ID_RESOURCE = endpoints.ResourceContainer(
+			message_types.VoidMessage,
+			id = messages.IntegerField(1, variant=messages.Variant.INT32),
+			label = messages.StringField(2, variant=messages.Variant.STRING))
+	@endpoints.method(ID_RESOURCE,
+			  AdvertMessage,
+			  path='single/{id}',
+			  http_method='GET',
+			  name='advert.query')
+	def query_adverts(self, request):
+		""" Returns the Advert with id.
+		
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
+		Author: Halldor Eldjarn, hae28@hi.is """
+		print("Requested ad: " + str(request.id))
+		label = request.label if request.label else LOST_PETS
+		try:
+			# Query on ancestor
+			ad = ndb.Key('AdvertCategory',
+				     label,
+				     'Advert',
+				     request.id).get()
+			return AdvertMessage(id = ad.key.id(),
+					     author = str(ad.author),
+					     name = ad.name,
+					     description = ad.description,
+					     species = ad.species,
+					     subspecies = ad.subspecies,
+					     color = ad.color,
+					     age = ad.age,
+					     lat = ad.lat,
+					     lon = ad.lon,
+					     date_created = ad.date_created,
+					     resolved = ad.resolved)
+		except Exception as e:
+			print(e)
+			raise endpoints.NotFoundException(
+					'Advert %s not found.' % (request.id,))
+	
+	
+	@endpoints.method(ID_RESOURCE,
+			  StatusMessage,
+			  path='resolve/{id}',
+			  http_method='POST',
+			  name='advert.resolve')
+	def resolve_advert(self, request):
+		""" If the invoking user is the owner of advert, it is 
+		marked as resolved
+
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		label = request.label if request.label else LOST_PETS
+		user = endpoints.get_current_user()
+		if raise_unauthorized and current_user is None:
+			raise endpoints.UnauthorizedException('Invalid token')
+		try:
+			ad = ndb.Key('AdvertCategory',
+				     label,
+				     'Advert',
+				     request.id).get()
+			if ad.user != user:
+				return StatusMessage(message = 'illegal')
+			ad.resolved = True
+			ad.put()
+			return StatusMessage(message = 'success')
+
+		except Exception as e:
+			print(e)
+			raise endpoints.NotFoundException(
+					'Advert $s not found.' % (request.id))
+
+		
+
 	#UPLOAD_PICTURE = endpoints.ResourceContainer(UploadImageMessage)
 	#@endpoints.method(UPLOAD_PICTURE,
 	#	UploadPictureMessage,
@@ -136,44 +211,6 @@ class Tyndr_API(remote.Service):
 		adverts = adverts.fetch(request.no)
 		# Package adverts in messages
 		return pack_adverts(adverts)
-
-	ID_RESOURCE = endpoints.ResourceContainer(
-			message_types.VoidMessage,
-			id = messages.IntegerField(1, variant=messages.Variant.INT32),
-			label = messages.StringField(2, variant=messages.Variant.STRING))
-	@endpoints.method(ID_RESOURCE,
-			  AdvertMessage,
-			  path='single/{id}',
-			  http_method='GET',
-			  name='advert.query')
-	def query_adverts(self, request):
-		""" Returns the Advert with id.
-		
-		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
-		Author: Halldor Eldjarn, hae28@hi.is """
-		print("Requested ad: " + str(request.id))
-		label = request.label if request.label else LOST_PETS
-		try:
-			# Query on ancestor
-			ad = ndb.Key('AdvertCategory',
-				     label,
-				     'Advert',
-				     request.id).get()
-			return AdvertMessage(id = ad.key.id(),
-					     author = str(ad.author),
-					     name = ad.name,
-					     description = ad.description,
-					     species = ad.species,
-					     subspecies = ad.subspecies,
-					     color = ad.color,
-					     age = ad.age,
-					     lat = ad.lat,
-					     lon = ad.lon,
-					     date_created = ad.date_created)
-		except Exception as e:
-			print(e)
-			raise endpoints.NotFoundException(
-					'Advert %s not found.' % (request.id,))
 	
 	@endpoints.method(message_types.VoidMessage,
 			  AdvertMessageCollection,
@@ -188,7 +225,7 @@ class Tyndr_API(remote.Service):
 		user = endpoints.get_current_user()
 		if raise_unauthorized and current_user is None:
 			raise endpoints.UnauthorizedException('Invalid token')
-		adverts = Advert.query(user = user)
+		adverts = Advert.query(user == user)
 		return pack_adverts(adverts)
 
 	@endpoints.method(message_types.VoidMessage,
@@ -204,5 +241,32 @@ class Tyndr_API(remote.Service):
 		if raise_unauthorized and current_user is None:
 			raise endpoints.UnauthorizedException('Invalid token')
 		return StatusMessage(message = user.email())
+
+	LOC_RESOURCE = endpoints.ResourceContainer(
+			message_types.VoidMessage,
+			lat = messages.StringField(1, variant=messages.Variant.STRING),
+			lon = messages.StringField(2, variant=messages.Variant.STRING),
+			label = messages.StringField(3, variant=messages.Variant.STRING))
+	@endpoints.method(LOC_RESOURCE,
+			  AdvertMessageCollection,
+			  path='loc-ads',
+			  http_method='GET',
+			  name='advert.loc')
+	def get_adverts_by_location(self, request):
+		""" Receives a latitude and a longitude and returns all adverts
+		in a rectangular area around that location.
+
+		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+		lat = request.lat
+		lon = request.lon
+
+		label = request.label if request.label else LOST_PETS
+		adverts = Advert.query(ancestor = adverts_key(label),
+				       resolved == False,
+				       lat > lat - LAT_R,
+				       lat < lat + LAT_R,
+				       lon > lon - LON_R,
+				       lon < lon + LON_R)
+		return pack_adverts(adverts)
 
 APPLICATION = endpoints.api_server([Tyndr_API])

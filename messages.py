@@ -21,6 +21,7 @@ class AdvertMessage(messages.Message):
 	# Geotag
 	lat = messages.StringField(10)
 	lon = messages.StringField(11)
+	resolved = messages.BooleanField(12)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts

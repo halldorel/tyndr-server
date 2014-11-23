@@ -9,7 +9,7 @@ class Advert(ndb.Model):
 	name = ndb.StringProperty()
 	description = ndb.StringProperty(indexed = False)
 	species = ndb.StringProperty()
-	subspecies = ndb.StringProperty(default=None)
+	subspecies = ndb.StringProperty(default = None)
 	color = ndb.StringProperty()
 	age = ndb.IntegerProperty()
 	lat = ndb.StringProperty()
