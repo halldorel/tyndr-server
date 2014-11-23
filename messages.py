@@ -19,8 +19,8 @@ class AdvertMessage(messages.Message):
 	age = messages.IntegerField(8)
 	date_created = message_types.DateTimeField(9)
 	# Geotag
-	lat = messages.StringField(10)
-	lon = messages.StringField(11)
+	lat = messages.FloatField(10)
+	lon = messages.FloatField(11)
 	resolved = messages.BooleanField(12)
 
 class AdvertMessageCollection(messages.Message):
@@ -41,8 +41,8 @@ class CreateAdvertMessage(messages.Message):
 	subspecies = messages.StringField(4)
 	color = messages.StringField(5)
 	age = messages.IntegerField(6)
-	lat = messages.StringField(7)
-	lon = messages.StringField(8)
+	lat = messages.FloatField(7)
+	lon = messages.FloatField(8)
 	label = messages.StringField(9, required=True)
 
 class StatusMessage(messages.Message):

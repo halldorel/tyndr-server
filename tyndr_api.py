@@ -53,7 +53,8 @@ def pack_adverts(adverts):
 				age = ad.age,
 				lat = ad.lat,
 				lon = ad.lon,
-				date_created = ad.date_created)
+				date_created = ad.date_created,
+				resolved = ad.resolved)
 		  for ad in adverts]
 	return AdvertMessageCollection(items=result)
 
@@ -244,9 +245,10 @@ class Tyndr_API(remote.Service):
 
 	LOC_RESOURCE = endpoints.ResourceContainer(
 			message_types.VoidMessage,
-			lat = messages.StringField(1, variant=messages.Variant.STRING),
-			lon = messages.StringField(2, variant=messages.Variant.STRING),
-			label = messages.StringField(3, variant=messages.Variant.STRING))
+			lat = messages.FloatField(1, variant=messages.Variant.FLOAT),
+			lon = messages.FloatField(2, variant=messages.Variant.FLOAT),
+			rng = messages.FloatField(3, variant=messages.Variant.FLOAT),
+			label = messages.StringField(4, variant=messages.Variant.STRING))
 	@endpoints.method(LOC_RESOURCE,
 			  AdvertMessageCollection,
 			  path='loc-ads',
@@ -259,14 +261,14 @@ class Tyndr_API(remote.Service):
 		Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 		lat = request.lat
 		lon = request.lon
+		rng = request.rng if request.rng else 0.2
 
 		label = request.label if request.label else LOST_PETS
-		adverts = Advert.query(ancestor = adverts_key(label),
-					resolved = False,
-					lat > lat - LAT_R,
-					lat < lat + LAT_R,
-					lon > lon - LON_R,
-					lon < lon + LON_R)
+		adverts = Advert.query(ancestor = adverts_key(label))\
+				.filter(Advert.resolved == False)\
+				.filter(Advert.lat > (lat - rng),
+					Advert.lat < (lat + rng))
+		adverts = [a for a in adverts if a.lon > lon - rng and a.lon < lon + rng]
 		return pack_adverts(adverts)
 
 APPLICATION = endpoints.api_server([Tyndr_API])

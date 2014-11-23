@@ -12,8 +12,8 @@ class Advert(ndb.Model):
 	subspecies = ndb.StringProperty(default = None)
 	color = ndb.StringProperty()
 	age = ndb.IntegerProperty()
-	lat = ndb.StringProperty()
-	lon = ndb.StringProperty()
+	lat = ndb.FloatProperty()
+	lon = ndb.FloatProperty()
 	date_created = ndb.DateTimeProperty(auto_now_add = True)
 	resolved = ndb.BooleanProperty(default = False)
 
