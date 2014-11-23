@@ -25,8 +25,8 @@ from models import *
 # Messages
 from messages import *
 
-WEB_CLIENT_ID = ''
-ANDROID_CLIENT_ID = ''
+WEB_CLIENT_ID = '259192441078-gmov6a7cj5dbg8ikdgkdalht3vuevs00.apps.googleusercontent.com'
+ANDROID_CLIENT_ID = '259192441078-0ummvnrplj1rk71mj2j7hf4e9vqm2u60.apps.googleusercontent.com'
 IOS_CLIENT_ID = ''
 ANDROID_AUDIENCE = WEB_CLIENT_ID
 
