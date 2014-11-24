@@ -39,9 +39,9 @@ LOST_PETS = 'lost_pets'
 def pack_adverts(adverts):
     """ Packs adverts in an AdvertMessageCollection
 
-    Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
-    Params:
-        adverts: A list of Advert model instances. """
+    :param adverts: A list of Advert model instances.
+
+    Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
     result = [AdvertMessage(id=ad.key.id(),
                             author=str(ad.author),
                             name=ad.name,
