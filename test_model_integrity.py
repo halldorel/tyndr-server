@@ -24,7 +24,7 @@ class ModelTestCase(unittest.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
-    def test_hrd_writes(self):
+    def test_global_query_does_not_return_data_if_query_is_global(self):
         """ Tests the consistency policy of the HRD. """
 
         class TestModel(ndb.Model):
@@ -37,12 +37,23 @@ class ModelTestCase(unittest.TestCase):
 
         # Global query shouldn't see the data, as per HRD consistency policy
         self.assertEqual(0, TestModel.query().fetch().count(3))
+
+    def test_ancestor_query_returns_data_if_ancestor_is_queried(self):
+        """ Tests the consistency policy of the HRD. """
+
+        class TestModel(ndb.Model):
+            pass
+
+        user_key = ndb.Key.from_path('User', 'kristjan')
+        # Put two entities
+        ndb.put([TestModel(parent=user_key),
+                 TestModel(parent=user_key)])
+
         # Ancestor query should see the data
         # => Hence, we do all our other queries on ancestor
         self.assertEqual(2, TestModel.query().fetch().ancestor(user_key).count(3))
 
-
-    def test_model_creation(self):
+    def test_model_is_created_with_correct_name_in_datastore(self):
         """ Tests the creation of a single advert, with time constraints. """
 
         key = 'lost_pets'
@@ -72,14 +83,38 @@ class ModelTestCase(unittest.TestCase):
                      reference).get()
 
         self.assertEqual(ad.name, 'Tommi')
+
+    def test_model_is_created_with_correct_time_constraint_in_datastore(self):
+        """ Tests the creation of a single advert, with time constraints. """
+
+        key = 'lost_pets'
+        start = time.time()
+
+        ad = Advert(parent = adverts_key(key),
+                    author = None,
+                    name = 'Tommi',
+                    description = 'Tall, blond',
+                    species = 'Human',
+                    subspecies = 'Homo sapiens',
+                    color = 'white',
+                    age = '23',
+                    lat = 100.0,
+                    lon = -27.0)
+        key = ad.put()
+        reference = key.id()
+
+        # If the put() method is blocking, ad.date_created should be in the
+        # range [start; end]
+        end = time.time()
+
+        # Query the datastore for the created model:
+        ad = ndb.Key('AdvertCategory',
+                     key,
+                     'Advert',
+                     reference).get()
+
         # Time constraints
         self.assertTrue(ad.date_created > start)
         self.assertTrue(ad.date_created < end)
-
-
-
-
-
-
 
 unittest.main()
