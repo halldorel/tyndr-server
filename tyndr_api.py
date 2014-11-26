@@ -110,7 +110,8 @@ class Tyndr_API(remote.Service):
                                  lon = ad.lon,
                                  date_created = ad.date_created,
                                  resolved = ad.resolved,
-                                 mine = ad.author == user)
+                                 mine = ad.author == user,
+                                 image_string = ad.image)
         except Exception as e:
             logging.info(e)
             raise endpoints.NotFoundException(
@@ -240,13 +241,6 @@ class Tyndr_API(remote.Service):
         rng = request.rng if request.rng else 0.2
 
         label = request.label if request.label else LOST_PETS
-        #adverts = Advert.query(ancestor=adverts_key(label)) \
-        #    .filter(Advert.resolved == False) \
-        #    .filter(Advert.lat > (lat - rng),
-        #            Advert.lat < (lat + rng))
-        # Datastore only allows one inequality comparison per query.
-        # Hence, we have to do this filtering ourselves:
-        #adverts = [a for a in adverts if a.lon > lon - rng and a.lon < lon + rng]
         ads = get_ads_in_range(label, lat, lon, rng)
         return pack_adverts(ads)
 

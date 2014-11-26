@@ -60,6 +60,7 @@ def pack_adverts(adverts, user = None):
                             lon=ad.lon,
                             date_created=ad.date_created,
                             resolved=ad.resolved,
-                            mine = ad.author == user)
+                            mine = ad.author == user,
+                            image_string = ad.image)
               for ad in adverts]
     return AdvertMessageCollection(items=result)
