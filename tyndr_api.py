@@ -68,6 +68,8 @@ class Tyndr_API(remote.Service):
             age = request.age,
             lat = request.lat,
             lon = request.lon,
+            sex = request.sex,
+            fur = request.fur,
             image = request.image_string
         )
         reference = str(advert.put().id())
@@ -108,6 +110,8 @@ class Tyndr_API(remote.Service):
                                  age = ad.age,
                                  lat = ad.lat,
                                  lon = ad.lon,
+                                 sex = ad.sex,
+                                 fur = ad.fur,
                                  date_created = ad.date_created,
                                  resolved = ad.resolved,
                                  mine = ad.author == user,
@@ -160,7 +164,7 @@ class Tyndr_API(remote.Service):
             return StatusMessage(message='success')
 
         except Exception as e:
-            print(e)
+            logging.info(e)
             raise endpoints.NotFoundException(
                 'Advert $s not found.' % (request.id))
 

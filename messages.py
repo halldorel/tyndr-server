@@ -23,11 +23,14 @@ class AdvertMessage(messages.Message):
 	# Geotag
 	lat = messages.FloatField(12)
 	lon = messages.FloatField(13)
-	resolved = messages.BooleanField(14)
+
+	sex = messages.StringField(14)
+	fur = messages.StringField(15)
+	resolved = messages.BooleanField(16)
 	# Denotes whether the querying client owns the advert
-	mine = messages.BooleanField(15)
+	mine = messages.BooleanField(17)
 	# Image contains a blob representation of the related image
-	image_string = messages.BytesField(16)
+	image_string = messages.BytesField(18)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts
@@ -51,6 +54,8 @@ class CreateAdvertMessage(messages.Message):
 	lon = messages.FloatField(8)
 	label = messages.StringField(9, required=True)
 	image_string = messages.BytesField(10)
+	sex = messages.StringField(11)
+	fur = messages.StringField(12)
 
 class StatusMessage(messages.Message):
 	""" Passes status to front end when operation should not return

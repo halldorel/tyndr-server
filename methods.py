@@ -58,6 +58,8 @@ def pack_adverts(adverts, user = None):
                             age=ad.age,
                             lat=ad.lat,
                             lon=ad.lon,
+                            sex=ad.sex,
+                            fur=ad.fur,
                             date_created=ad.date_created,
                             resolved=ad.resolved,
                             mine = ad.author == user,

@@ -11,6 +11,8 @@ class Advert(ndb.Model):
     species = ndb.StringProperty()
     subspecies = ndb.StringProperty(default = None)
     color = ndb.StringProperty()
+    fur = ndb.StringProperty()
+    sex = ndb.StringProperty()
     age = ndb.IntegerProperty()
     lat = ndb.FloatProperty()
     lon = ndb.FloatProperty()
