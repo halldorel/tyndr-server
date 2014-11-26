@@ -14,7 +14,7 @@ import endpoints
 from protorpc import remote
 
 # Database access
-from google.appengine.api import users
+#from google.appengine.api import users
 #from google.appengine.ext import ndb
 
 # Image handling
@@ -24,6 +24,8 @@ from google.appengine.api import images
 from models import *
 # Messages
 from messages import *
+# Utils
+from methods import *
 
 WEB_CLIENT_ID = '259192441078-gmov6a7cj5dbg8ikdgkdalht3vuevs00.apps.googleusercontent.com'
 ANDROID_CLIENT_ID = '259192441078-65b660d346mf6sirs2mpcbg03sdk8ftj.apps.googleusercontent.com'
@@ -34,29 +36,6 @@ ANDROID_AUDIENCE = WEB_CLIENT_ID
 # Default advert categories
 FOUND_PETS = 'found_pets'
 LOST_PETS = 'lost_pets'
-
-
-def pack_adverts(adverts):
-    """ Packs adverts in an AdvertMessageCollection
-
-    :param adverts: A list of Advert model instances.
-
-    Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-    result = [AdvertMessage(id=ad.key.id(),
-                            author=str(ad.author),
-                            name=ad.name,
-                            description=ad.description,
-                            species=ad.species,
-                            subspecies=ad.subspecies,
-                            color=ad.color,
-                            age=ad.age,
-                            lat=ad.lat,
-                            lon=ad.lon,
-                            date_created=ad.date_created,
-                            resolved=ad.resolved)
-              for ad in adverts]
-    return AdvertMessageCollection(items=result)
-
 
 @endpoints.api(name='tyndr', version='v1',
                allowed_client_ids=[WEB_CLIENT_ID, ANDROID_CLIENT_ID,
@@ -88,20 +67,20 @@ class Tyndr_API(remote.Service):
         Author: Halldor Eldjarn, hae28@hi.is """
         label = request.label if request.label else LOST_PETS
         user = endpoints.get_current_user()
-        if user is None:
-            raise endpoints.UnauthorizedException('Invalid token')
+        #if user is None:
+        #    raise endpoints.UnauthorizedException('Invalid token')
         # Create a new advert
         advert = Advert(
-            parent=adverts_key(label),
-            author=user,
-            name=request.name,
-            description=request.description,
-            species=request.species,
-            subspecies=request.subspecies,
-            color=request.color,
-            age=request.age,
-            lat=request.lat,
-            lon=request.lon
+            parent = adverts_key(label),
+            author = user,
+            name = request.name,
+            description = request.description,
+            species = request.species,
+            subspecies = request.subspecies,
+            color = request.color,
+            age = request.age,
+            lat = request.lat,
+            lon = request.lon
         )
         reference = str(advert.put().id())
 
@@ -128,22 +107,25 @@ class Tyndr_API(remote.Service):
         label = request.label if request.label else LOST_PETS
         try:
             # Query on ancestor
-            ad = ndb.Key('AdvertCategory',
-                         label,
-                         'Advert',
-                         request.id).get()
-            return AdvertMessage(id=ad.key.id(),
-                                 author=str(ad.author),
-                                 name=ad.name,
-                                 description=ad.description,
-                                 species=ad.species,
-                                 subspecies=ad.subspecies,
-                                 color=ad.color,
-                                 age=ad.age,
-                                 lat=ad.lat,
-                                 lon=ad.lon,
-                                 date_created=ad.date_created,
-                                 resolved=ad.resolved)
+            #ad = ndb.Key('AdvertCategory',
+            #             label,
+            #             'Advert',
+            #             request.id).get()
+            ad = query_ad(label, request.id)
+            user = endpoints.get_current_user()
+            return AdvertMessage(id = ad.key.id(),
+                                 author = str(ad.author),
+                                 name = ad.name,
+                                 description = ad.description,
+                                 species = ad.species,
+                                 subspecies = ad.subspecies,
+                                 color = ad.color,
+                                 age = ad.age,
+                                 lat = ad.lat,
+                                 lon = ad.lon,
+                                 date_created = ad.date_created,
+                                 resolved = ad.resolved,
+                                 mine = ad.author == user)
         except Exception as e:
             print(e)
             raise endpoints.NotFoundException(
@@ -166,10 +148,11 @@ class Tyndr_API(remote.Service):
         if user is None:
             raise endpoints.UnauthorizedException('Invalid token')
         try:
-            ad = ndb.Key('AdvertCategory',
-                         label,
-                         'Advert',
-                         request.id).get()
+            #ad = ndb.Key('AdvertCategory',
+            #             label,
+            #             'Advert',
+            #             request.id).get()
+            ad = query_ad(label, request.id)
             if ad.user != user:
                 return StatusMessage(message='illegal')
             ad.resolved = True
@@ -282,42 +265,15 @@ class Tyndr_API(remote.Service):
         rng = request.rng if request.rng else 0.2
 
         label = request.label if request.label else LOST_PETS
-        adverts = Advert.query(ancestor=adverts_key(label)) \
-            .filter(Advert.resolved == False) \
-            .filter(Advert.lat > (lat - rng),
-                    Advert.lat < (lat + rng))
-        adverts = [a for a in adverts if a.lon > lon - rng and a.lon < lon + rng]
-        return pack_adverts(adverts)
-
-    #################
-    #               #
-    #    MESSAGES   #
-    #               #
-    #################
-
-
-    MSG_CREATE_RESOURCE = endpoints.ResourceContainer(
-        message_types.VoidMessage,
-        msg = messages.StringField(1, variant = messages.Variant.STRING),
-        receiver = messages.StringField(2, variant = messages.Variant.STRING)
-    )
-
-    @endpoints.method(MSG_CREATE_RESOURCE,
-                       StatusMessage,
-                       path='create-msg',
-                       http_method='POST',
-                       name='msg.create')
-    def create_message(self, request):
-        sender = endpoints.get_current_user()
-        #if sender is None:
-        #    raise endpoints.UnauthorizedException('Invalid token')
-        receiver = users.query(id = request.receiver)
-        print(receiver)
-        #message = Message(
-        #    text = request.msg,
-        #
-        #)
-        return StatusMessage(message = 'drasl')
+        #adverts = Advert.query(ancestor=adverts_key(label)) \
+        #    .filter(Advert.resolved == False) \
+        #    .filter(Advert.lat > (lat - rng),
+        #            Advert.lat < (lat + rng))
+        # Datastore only allows one inequality comparison per query.
+        # Hence, we have to do this filtering ourselves:
+        #adverts = [a for a in adverts if a.lon > lon - rng and a.lon < lon + rng]
+        ads = get_ads_in_range(label, lat, lon, rng)
+        return pack_adverts(ads)
 
 
 APPLICATION = endpoints.api_server([Tyndr_API])

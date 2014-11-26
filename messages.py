@@ -22,6 +22,8 @@ class AdvertMessage(messages.Message):
 	lat = messages.FloatField(10)
 	lon = messages.FloatField(11)
 	resolved = messages.BooleanField(12)
+	# Denotes whether the querying client owns the advert
+	mine = messages.BooleanField(13)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts
