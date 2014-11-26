@@ -9,21 +9,8 @@ package = 'tyndr-server'
 
 import endpoints
 # Message passing
-#from protorpc import messages
-#from protorpc import message_types
 from protorpc import remote
 
-# Database access
-#from google.appengine.api import users
-#from google.appengine.ext import ndb
-
-# Image handling
-from google.appengine.api import images
-
-# Models
-from models import *
-# Messages
-from messages import *
 # Utils
 from methods import *
 
@@ -67,8 +54,8 @@ class Tyndr_API(remote.Service):
         Author: Halldor Eldjarn, hae28@hi.is """
         label = request.label if request.label else LOST_PETS
         user = endpoints.get_current_user()
-        #if user is None:
-        #    raise endpoints.UnauthorizedException('Invalid token')
+        if user is None:
+            raise endpoints.UnauthorizedException('Invalid token')
         # Create a new advert
         advert = Advert(
             parent = adverts_key(label),
@@ -80,7 +67,8 @@ class Tyndr_API(remote.Service):
             color = request.color,
             age = request.age,
             lat = request.lat,
-            lon = request.lon
+            lon = request.lon,
+            image = request.image_string
         )
         reference = str(advert.put().id())
 
@@ -106,11 +94,6 @@ class Tyndr_API(remote.Service):
         print("Requested ad: " + str(request.id))
         label = request.label if request.label else LOST_PETS
         try:
-            # Query on ancestor
-            #ad = ndb.Key('AdvertCategory',
-            #             label,
-            #             'Advert',
-            #             request.id).get()
             ad = query_ad(label, request.id)
             user = endpoints.get_current_user()
             return AdvertMessage(id = ad.key.id(),
@@ -125,7 +108,8 @@ class Tyndr_API(remote.Service):
                                  lon = ad.lon,
                                  date_created = ad.date_created,
                                  resolved = ad.resolved,
-                                 mine = ad.author == user)
+                                 mine = ad.author == user,
+                                 image_string = ad.image)
         except Exception as e:
             print(e)
             raise endpoints.NotFoundException(
@@ -163,30 +147,6 @@ class Tyndr_API(remote.Service):
             print(e)
             raise endpoints.NotFoundException(
                 'Advert $s not found.' % (request.id))
-
-
-    # UPLOAD_PICTURE = endpoints.ResourceContainer(UploadImageMessage)
-    #@endpoints.method(UPLOAD_PICTURE,
-    #	UploadPictureMessage,
-    #	path='upload',
-    #	http_method='POST',
-    #	name='picture.create')
-    #def upload_picture(self, request):
-    #	""" Uploads the image from the request to the S3 bucket.
-    #
-    #	Author: Halldor Eldjarn, hae28@hi.is
-    #	"""
-    #	# TODO:  Should upload image data to S3 instead of storing in db
-    #
-    #	picture_data = request.get('picture')
-    #
-    #	user = endpoints.get_current_user()
-    #	location = GeoPt(request.lat, request.lon)
-    #	picture = Picture(author = user,
-    #		location = location,
-    #		picture_data = db.Blob(picture_data))
-    #	picture.put()
-    #	return StatusMessage(message='success')
 
 
     NO_RESOURCE = endpoints.ResourceContainer(

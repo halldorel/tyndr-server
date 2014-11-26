@@ -16,6 +16,7 @@ class Advert(ndb.Model):
     lon = ndb.FloatProperty()
     date_created = ndb.DateTimeProperty(auto_now_add = True)
     resolved = ndb.BooleanProperty(default = False)
+    image = ndb.BlobProperty()
 
 
 class Picture(ndb.Model):

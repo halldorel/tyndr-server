@@ -11,19 +11,22 @@ class AdvertMessage(messages.Message):
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	id = messages.IntegerField(1)
 	author = messages.StringField(2)
-	name = messages.StringField(3)
-	description = messages.StringField(4)
-	species = messages.StringField(5)
-	subspecies = messages.StringField(6)
-	color = messages.StringField(7)
-	age = messages.IntegerField(8)
-	date_created = message_types.DateTimeField(9)
+	author_email = messages.StringField(3)
+	name = messages.StringField(4)
+	description = messages.StringField(5)
+	species = messages.StringField(6)
+	subspecies = messages.StringField(7)
+	color = messages.StringField(8)
+	age = messages.IntegerField(9)
+	date_created = message_types.DateTimeField(10)
 	# Geotag
-	lat = messages.FloatField(10)
-	lon = messages.FloatField(11)
-	resolved = messages.BooleanField(12)
+	lat = messages.FloatField(11)
+	lon = messages.FloatField(12)
+	resolved = messages.BooleanField(13)
 	# Denotes whether the querying client owns the advert
-	mine = messages.BooleanField(13)
+	mine = messages.BooleanField(14)
+	# Image contains a blob representation of the related image
+	image_string = messages.BytesField(15)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts
@@ -46,6 +49,7 @@ class CreateAdvertMessage(messages.Message):
 	lat = messages.FloatField(7)
 	lon = messages.FloatField(8)
 	label = messages.StringField(9, required=True)
+	image_string = messages.BytesField(10)
 
 class StatusMessage(messages.Message):
 	""" Passes status to front end when operation should not return
@@ -55,7 +59,8 @@ class StatusMessage(messages.Message):
 	message = messages.StringField(1)
 
 class AdvertReferenceMessage(messages.Message):
-	""" Passes an advert's reference number to the endpoint
+	""" Passes an advert's reference number and image upload url
+	to the endpoint.
 	
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	reference = messages.StringField(1)
