@@ -29,24 +29,6 @@ class Picture(ndb.Model):
     advert_id = ndb.IntegerProperty()
 
 
-#class Conversation(ndb.Model):
-#	""" Represents a collection of messages between 2+ users
-#
-#	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-#	parties = ndb.KeyProperty(kind = 'User', repeated = True)
-#
-
-class Message(ndb.Model):
-    """ A single message between two users
-
-    Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
-    text = ndb.StringProperty(indexed = False)
-    sender = ndb.UserProperty()
-    receiver = ndb.UserProperty()
-    date_created = ndb.DateTimeProperty(auto_now_add = True)
-    seen = ndb.DateTimeProperty(indexed = False)
-
-
 # Advert collections should be queried on their common ancestor
 def adverts_key(advert_category):
     """ Constructs a Datastore key for Advert Category entity with
