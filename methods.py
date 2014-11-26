@@ -1,3 +1,4 @@
+import logging
 from models import *
 from messages import *
 
@@ -10,10 +11,12 @@ def query_ad(label, reference):
     :return: An Advert corresponding to label and reference
 
     Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
+    logging.info(reference)
+    logging.info(type(reference))
     return ndb.Key('AdvertCategory',
                    label,
                    'Advert',
-                   reference).get()
+                   int(reference)).get()
 
 
 def get_ads_in_range(label, lat, lon, rng):
@@ -45,6 +48,8 @@ def pack_adverts(adverts, user = None):
     Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
     result = [AdvertMessage(id=ad.key.id(),
                             author=str(ad.author),
+                            author_name = ad.author.nickname() if ad.author else '',
+                            author_email = ad.author.email() if ad.author else '',
                             name=ad.name,
                             description=ad.description,
                             species=ad.species,

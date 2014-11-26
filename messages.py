@@ -11,22 +11,23 @@ class AdvertMessage(messages.Message):
 	Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is """
 	id = messages.IntegerField(1)
 	author = messages.StringField(2)
-	author_email = messages.StringField(3)
-	name = messages.StringField(4)
-	description = messages.StringField(5)
-	species = messages.StringField(6)
-	subspecies = messages.StringField(7)
-	color = messages.StringField(8)
-	age = messages.IntegerField(9)
-	date_created = message_types.DateTimeField(10)
+	author_name = messages.StringField(3)
+	author_email = messages.StringField(4)
+	name = messages.StringField(5)
+	description = messages.StringField(6)
+	species = messages.StringField(7)
+	subspecies = messages.StringField(8)
+	color = messages.StringField(9)
+	age = messages.IntegerField(10)
+	date_created = message_types.DateTimeField(11)
 	# Geotag
-	lat = messages.FloatField(11)
-	lon = messages.FloatField(12)
-	resolved = messages.BooleanField(13)
+	lat = messages.FloatField(12)
+	lon = messages.FloatField(13)
+	resolved = messages.BooleanField(14)
 	# Denotes whether the querying client owns the advert
-	mine = messages.BooleanField(14)
+	mine = messages.BooleanField(15)
 	# Image contains a blob representation of the related image
-	image_string = messages.BytesField(15)
+	image_string = messages.BytesField(16)
 
 class AdvertMessageCollection(messages.Message):
 	""" Collection of AdvertMessages. Used to pass multiple adverts

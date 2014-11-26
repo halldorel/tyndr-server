@@ -77,7 +77,7 @@ class Tyndr_API(remote.Service):
 
     ID_RESOURCE = endpoints.ResourceContainer(
         message_types.VoidMessage,
-        id=messages.IntegerField(1, variant=messages.Variant.INT32),
+        id=messages.StringField(1, variant=messages.Variant.STRING),
         label=messages.StringField(2, variant=messages.Variant.STRING)
     )
 
@@ -91,13 +91,15 @@ class Tyndr_API(remote.Service):
 
         Author: Kristjan Eldjarn Hjorleifsson, keh4@hi.is
         Author: Halldor Eldjarn, hae28@hi.is """
-        print("Requested ad: " + str(request.id))
+        logging.info("Requested ad: " + str(request.id))
         label = request.label if request.label else LOST_PETS
         try:
             ad = query_ad(label, request.id)
             user = endpoints.get_current_user()
             return AdvertMessage(id = ad.key.id(),
                                  author = str(ad.author),
+                                 author_name = ad.author.nickname() if ad.author else '',
+                                 author_email = ad.author.email() if ad.author else '',
                                  name = ad.name,
                                  description = ad.description,
                                  species = ad.species,
@@ -108,10 +110,27 @@ class Tyndr_API(remote.Service):
                                  lon = ad.lon,
                                  date_created = ad.date_created,
                                  resolved = ad.resolved,
-                                 mine = ad.author == user,
+                                 mine = ad.author == user)
+        except Exception as e:
+            logging.info(e)
+            raise endpoints.NotFoundException(
+                'Advert %s not found.' % (request.id,)
+            )
+
+
+    @endpoints.method(ID_RESOURCE,
+                      AdvertMessage,
+                      path='image/{id}',
+                      http_method='GET',
+                      name='advert.img')
+    def get_ad_img(self, request):
+        label = request.label if request.label else LOST_PETS
+        try:
+            ad = query_ad(label, request.id)
+            return AdvertMessage(id = ad.key.id(),
                                  image_string = ad.image)
         except Exception as e:
-            print(e)
+            logging.info(e)
             raise endpoints.NotFoundException(
                 'Advert %s not found.' % (request.id,)
             )
@@ -132,10 +151,6 @@ class Tyndr_API(remote.Service):
         if user is None:
             raise endpoints.UnauthorizedException('Invalid token')
         try:
-            #ad = ndb.Key('AdvertCategory',
-            #             label,
-            #             'Advert',
-            #             request.id).get()
             ad = query_ad(label, request.id)
             if ad.user != user:
                 return StatusMessage(message='illegal')
