@@ -20,7 +20,7 @@ Once the server is running, navigate to http://localhost:8080/_ah/api/explorer
 
 ####Interfacing with the API
 
-All calls for adverts must be supplied with a label, denoting them as either lost_pets or found_pets
+All calls for adverts must be supplied with a label, denoting them as either "lost_pets" or "found_pets"
 
 #####Creating an Advert
 
